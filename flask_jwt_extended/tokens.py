@@ -38,14 +38,16 @@ def _encode_jwt(
     if isinstance(fresh, timedelta):
         fresh = datetime.timestamp(now + fresh)
 
-    identity_claim_key = identity_claim_keys[0]
+    identity_claims = {}
+    for identity_claim_key in identity_claim_keys:
+        identity_claims[identity_claim_key] = identity
 
     token_data = {
         "fresh": fresh,
         "iat": now,
         "jti": str(uuid.uuid4()),
         "type": token_type,
-        identity_claim_key: identity,
+        **identity_claims,
     }
 
     if nbf:
