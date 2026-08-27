@@ -89,7 +89,12 @@ def _decode_jwt(
     secret: str,
     verify_aud: bool,
 ) -> dict:
-    options = {"verify_aud": verify_aud}
+    # PyJWT >= 2.10 rejects tokens whose "sub" claim is not a string. Our
+    # identities are dicts (see numbox's user_identity_loader), so every token
+    # we have ever minted carries a dict sub. Verification is disabled to keep
+    # PyJWT 2.9 behavior; upstream 4.7.1 exposes the same switch as the
+    # JWT_VERIFY_SUB config option.
+    options = {"verify_aud": verify_aud, "verify_sub": False}
     if allow_expired:
         options["verify_exp"] = False
 
