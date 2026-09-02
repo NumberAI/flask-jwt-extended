@@ -334,10 +334,11 @@ def test_jwt_invalid_audience(app):
     assert response.get_json() == {"msg": 'Token is missing the "aud" claim'}
 
     # Audience claim still expected and wrong one provided - not OK
+    # (PyJWT renamed this error message in 2.10)
     access_token = encode_token(app, {"aud": "different_audience", "sub": "me"})
     response = test_client.get(url, headers=make_headers(access_token))
     assert response.status_code == 422
-    assert response.get_json() == {"msg": "Invalid audience"}
+    assert response.get_json()["msg"] in ("Invalid audience", "Audience doesn't match")
 
 
 def test_jwt_invalid_issuer(app):

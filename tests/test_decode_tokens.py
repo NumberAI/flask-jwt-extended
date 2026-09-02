@@ -71,6 +71,16 @@ def test_default_decode_token_values(app, default_access_token):
         assert decoded["fresh"] is False
 
 
+def test_decode_token_with_non_string_sub(app):
+    # PyJWT >= 2.10 rejects non-string "sub" claims unless verify_sub is
+    # disabled; numbox identities are dicts, so this must keep decoding.
+    identity = {"user": "username", "type": "access"}
+    with app.test_request_context():
+        token = create_access_token(identity)
+        decoded = decode_token(token)
+        assert decoded["sub"] == identity
+
+
 def test_supports_decoding_other_token_types(app, default_access_token):
     default_access_token["type"] = "app"
     other_token = encode_token(app, default_access_token)
